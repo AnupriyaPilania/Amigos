@@ -1,0 +1,49 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.0.xsd">
+
+	<security:global-method-security
+		secured-annotations="enabled" />
+
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+		<property name="url" value="jdbc:oracle:thin:@localhost:1521:XE" />
+		<property name="username" value="anupriya" />
+		<property name="password" value="anupriya_123" />
+	</bean>
+
+	  <security:http auto-config="true">
+		<!-- Restrict URLs based on role -->
+		<security:intercept-url pattern="/admin/**"
+			access="hasRole('ROLE_ADMIN')" />
+			<security:intercept-url pattern="/user/**" access="hasRole('ROLE_USER')" />
+		<security:intercept-url pattern="/**"
+			access="permitAll or hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')" />
+
+		<!-- Override default login and logout pages -->
+		<security:form-login login-page="/index"
+			username-parameter="username" password-parameter="password"
+			default-target-url="/userprofile" authentication-failure-url="/index?error=1" />
+	
+	<!-- 	<security:logout logout-url="/logout"
+			logout-success-url="/loginpage?logout" /> -->
+			
+		
+
+		<security:csrf disabled="true" />
+	</security:http>
+
+	<security:authentication-manager>
+		<security:authentication-provider>
+			<!--  <security:password-encoder hash="bcrypt" /> -->
+			<security:jdbc-user-service
+				data-source-ref="dataSource"
+			
+				users-by-username-query="select email, password, enabled from userdetails where email = ?"
+				authorities-by-username-query="select email, role from userdetails where email = ?" />
+
+		</security:authentication-provider>
+	</security:authentication-manager>
+
+</beans>

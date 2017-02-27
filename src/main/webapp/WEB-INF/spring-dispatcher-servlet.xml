@@ -1,0 +1,74 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+   xmlns:context="http://www.springframework.org/schema/context"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:mvc="http://www.springframework.org/schema/mvc"
+   xmlns:tx="http://www.springframework.org/scheme/tx"
+   xmlns:websocket="http://www.springframework.org/schema/websocket"
+   xsi:schemaLocation=" 
+   http://www.springframework.org/schema/beans     
+   http://www.springframework.org/schema/beans/spring-beans.xsd
+   http://www.springframework.org/schema/context
+   http://www.springframework.org/schema/context/spring-context.xsd
+   http://www.springframework.org/schema/mvc
+   http://www.springframework.org/schema/mvc/spring-mvc.xsd
+   http://www.springframework.org/schema/tx
+   http://www.springframework.org/schema/tx/spring-tx.xsd
+   http://www.springframework.org/schema/websocket
+   http://www.springframework.org/schema/websocket/spring-websocket.xsd "> 
+   
+   
+  <context:component-scan base-package="com.whatsapp"/>
+  
+  <mvc:resources mapping="/resources/**" location="/resources/" />
+    <mvc:annotation-driven />
+     
+      <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+          <property name="prefix" value="/WEB-INF/views/" />
+          <property name="suffix" value=".jsp" />
+      </bean>
+      
+      <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+	      <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
+	      <property name="url" value="jdbc:oracle:thin:@localhost:1521:XE"/>
+	      <property name="username" value="anupriya"/>
+	      <property name="password" value="anupriya_123"/>
+      </bean>
+  
+  	   <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		   <property name="dataSource" ref="dataSource" />
+		   <property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+			</props>
+		   </property>
+		
+		   <property name="packagesToScan">
+		      <list>
+		            <value>com.whatsapp.user</value>
+		            <value>com.whatsapp.blog</value>
+		            <value>com.whatsapp.friend</value>
+		            <value>com.whatsapp.forum</value>
+		            <value>com.whatsapp.forumcomment</value>
+		            
+		     </list>
+		   </property>
+		
+	   </bean>
+
+        <bean id="TransactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager"> 
+             <property name="sessionFactory" ref="sessionFactory"/>
+        </bean>
+        
+        	<bean id="multipartResolver"
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        	<property name="maxUploadSize" value="100000000"/>
+    	</bean>
+        
+        <websocket:message-broker application-destination-prefix="/app" >
+        <websocket:stomp-endpoint path="/chat, /privatechat">
+        <websocket:sockjs/></websocket:stomp-endpoint>
+        <websocket:simple-broker prefix="/topic, /queue"/></websocket:message-broker>
+        
+   </beans>
